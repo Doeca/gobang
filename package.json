@@ -1,0 +1,30 @@
+{
+    "name": "react_gobang",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack --config webpack.config.js",
+        "watch": "webpack-dev-server"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@babel/core": "^7.17.10",
+        "@babel/preset-env": "^7.17.10",
+        "@babel/preset-react": "^7.16.7",
+        "babel-loader": "^8.2.5",
+        "webpack": "^5.72.1",
+        "webpack-cli": "^4.9.2",
+        "webpack-dev-server": "^4.9.0"
+    },
+    "dependencies": {
+        "@material-ui/core": "^4.12.4",
+        "@sabaki/go-board": "^1.4.3",
+        "@sabaki/shudan": "^1.6.4",
+        "react": "^18.1.0",
+        "react-dom": "^18.1.0"
+    }
+}
