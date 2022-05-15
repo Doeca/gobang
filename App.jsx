@@ -65,12 +65,23 @@ const createTwoWayCheckBox = component => ({ stateKey, text }) =>
     h('span', { style: { userSelect: 'none' } }, text)
   )
 
+class Title extends Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return h('h1', {}, this.props.title)
+  }
+}
+
 class App extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       board: new Board(signMap),
+      title: "五子棋",
       vertexSize: 20,
       showCoordinates: true,
       alternateCoordinates: false,
@@ -79,12 +90,83 @@ class App extends Component {
       showLines: false,
       showSelection: false,
       isBusy: false,
+      selectedVertices: [],
       sign: 1
     }
 
     //this.state.board.fromDimensions(15)
     //console.log(this.state.board.signMap)
     this.CheckBox = createTwoWayCheckBox(this)
+  }
+
+  isVictory(sign, map, vertex) {
+
+    let count = 0
+    let x = vertex[0]
+    let y = vertex[1]
+
+    while (--x > 0)
+      if (map[y][x] == sign)
+        count++
+      else break
+
+
+    x = vertex[0]
+    while (++x < 15)
+      if (map[y][x] == sign)
+        count++
+      else break
+    if (count >= 4) return true;
+
+
+
+    count = 0
+    x = vertex[0]
+    y = vertex[1]
+    while (--y > 0)
+
+      if (map[y][x] === sign)
+        count++
+      else break
+    y = vertex[1]
+    while (++y < 15)
+      if (map[y][x] === sign)
+        count++
+      else break
+    if (count >= 4) return true;
+
+
+    count = 0
+    x = vertex[0]
+    y = vertex[1]
+    while (--x > 0 && --y > 0)
+      if (map[y][x] === sign)
+        count++
+      else break
+    x = vertex[0]
+    y = vertex[1]
+    while (++x < 15 && ++y < 15)
+      if (map[y][x] === sign)
+        count++
+      else break
+    if (count >= 4) return true;
+
+    count = 0
+    x = vertex[0]
+    y = vertex[1]
+    while (--x > 0 && ++y < 15)
+      if (map[y][x] === sign)
+        count++
+      else break
+    x = vertex[0]
+    y = vertex[1]
+    while (++x < 15 && --y > 0)
+      if (map[y][x] === sign)
+        count++
+      else break
+    if (count >= 4) return true;
+
+    return false;
   }
 
   render() {
@@ -94,19 +176,14 @@ class App extends Component {
       alternateCoordinates,
       fuzzyStonePlacement,
       animateStonePlacement,
-      showPaintMap,
-      showHeatMap,
-      showMarkerMap,
-      showGhostStones,
-      showLines,
-      showSelection
+      selectedVertices
     } = this.state
 
     return h(
       'section', {
       style: {
         display: 'grid',
-        gridTemplateColumns: '15em auto',
+        gridTemplateColumns: 'auto',
         gridColumnGap: '1em'
       }
     },
@@ -118,10 +195,8 @@ class App extends Component {
           flexDirection: 'column'
         }
       },
-
-
       ),
-
+      h(Title, { title: this.state.title }),
       h(
         'div', {},
         h(Goban, {
@@ -134,38 +209,29 @@ class App extends Component {
           busy: this.state.isBusy,
           coordX: alternateCoordinates ? i => chineseCoord[i] : undefined,
           coordY: alternateCoordinates ? i => i + 1 : undefined,
-
           signMap: this.state.board.signMap,
           showCoordinates,
           fuzzyStonePlacement,
           animateStonePlacement,
-          paintMap: showPaintMap && paintMap,
-          heatMap: showHeatMap && heatMap,
-          markerMap: showMarkerMap && markerMap,
-          ghostStoneMap: showGhostStones && ghostStoneMap,
-
-          lines: showLines ?
-            [
-              { type: 'line', v1: [15, 6], v2: [12, 15] },
-              { type: 'arrow', v1: [10, 4], v2: [5, 7] }
-            ] :
-            [],
-
-          dimmedVertices: [],
-
-          selectedVertices: [],
-
+          selectedVertices: selectedVertices,
           onVertexMouseUp: (evt, [x, y]) => {
-            //let sign = evt.button === 0 ? 1 : -1
-            let newBoard
+            let newBoard, victory, title
             try {
-              newBoard = this.state.board.makeMove(this.state.sign, [x, y], { preventOverwrite: true })
+              if (this.state.board.get([x, y]) != 0)
+                throw 101;
+              newBoard = this.state.board.set([x, y], this.state.sign)
+              victory = this.isVictory(this.state.sign, newBoard.signMap, [x, y])
+
+              title = this.state.title
+              if (victory)
+                title += " , " + (this.state.sign === 1 ? "黑棋胜" : "白棋胜")
+
+              this.setState({ board: newBoard, sign: this.state.sign * -1, selectedVertices: [[x, y]], isBusy: victory, title: title })
+
             } catch (e) {
-              this.setState({isBusy:true})
-              newBoard = this.state.board.clone();
+
             }
-            this.setState({ sign: this.state.sign * -1 })
-            this.setState({ board: newBoard })
+
           }
         }),
 
@@ -179,6 +245,8 @@ class App extends Component {
       )
     )
   }
+
+
 }
 
 ReactDOM.render(h(App), document.getElementById('root'))
