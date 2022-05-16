@@ -1,12 +1,13 @@
 ﻿// Basic Router
 // Principal : Xiaoxue Wang
-import React ,{ component } from 'react';
+import React ,{ Component } from 'react';
 import ReactDOM from 'react-dom';
 
 
-class App extends component{
-    constructor()
+class App extends Component{
+    constructor(prop)
     {
+        super(prop)
     }
 
     render()
