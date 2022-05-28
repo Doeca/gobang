@@ -233,4 +233,7 @@ class App extends Component {
 
 }
 
-ReactDOM.render(h(App), document.getElementById('root'))
+export default function Game()
+{
+  return h(App);
+}

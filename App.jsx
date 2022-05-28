@@ -1,18 +1,34 @@
-﻿// Basic Router
-// Principal : Xiaoxue Wang
-import React ,{ Component } from 'react';
-import ReactDOM from 'react-dom';
+﻿import React from 'react'
+import ReactDOM from "react-dom/client";
+import {
+    HashRouter,
+    Routes,
+    Route
+} from "react-router-dom";
 
+import Register from "./pages/Register.jsx"
+import Login from "./pages/Login.jsx"
+import Home from "./pages/Home.jsx"
 
-class App extends Component{
-    constructor(prop)
-    {
-        super(prop)
-    }
+const root = ReactDOM.createRoot(
+    document.getElementById("root")
+);
 
-    render()
-    {
-
-        return <h1></h1>
-    }
-}
+root.render(
+    <HashRouter>
+        <Routes>
+            <Route path="/" element={<Home />}>
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route
+                    path="*"
+                    element={
+                        <main style={{ padding: "1rem" }}>
+                            <p>There's nothing here!</p>
+                        </main>
+                    }
+                />
+            </Route>
+        </Routes>
+    </HashRouter>
+);
