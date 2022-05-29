@@ -5,6 +5,9 @@ import { Goban } from '@sabaki/shudan';
 import signMap from './signMap';
 const h = React.createElement;
 
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
@@ -70,8 +73,7 @@ class App extends Component {
 
     this.state = {
       board: new Board(signMap),
-      title: "五子棋",
-      vertexSize: 20,
+      vertexSize: 27,
       showCoordinates: true,
       alternateCoordinates: false,
       fuzzyStonePlacement: true,
@@ -238,12 +240,14 @@ class App extends Component {
 
 }
 
-function Bang() {
+function Bang()
+{
   return h(App);
 }
 
-export default function Game() {
-  return (
+export default function Game()
+{
+  return(
     <Box
       sx={{
         marginTop: 0,
@@ -253,15 +257,69 @@ export default function Game() {
       }}
     >
       <Container maxWidth="sm">
-        <CssBaseline />
-        <Appbar />
-        <Outlet />
+       <CssBaseline  />
+         <Appbar />
+          <Outlet />
       </Container>
 
+      
+      <Box
+      sx={{
+        marginTop: 4,
+        display: 'flex',
+        alignItems: 'center',
+      }}
+      >
+        <Typography component="h1" variant="h4">
+        游戏中
+        </Typography>
+        
 
+      </Box>
+      
       <Bang />
-    </Box>
 
+      <Box
+      sx={{
+        marginTop: 6,
+        display: 'flex',
+        alignItems: 'center',
+      }}
+      >
+        <Grid container spacing={7}>
+          <Grid item>
+            <Button 
+            variant="contained" 
+            color="warning"
+            size="large"
+            >
+             投降
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button 
+            variant="contained" 
+            color="primary"
+            size="large"
+            >
+              退出游戏
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button 
+            variant="contained" 
+            color="success"
+            size="large"
+            >
+              和棋
+            </Button>
+          </Grid>
+        </Grid>
+          
+      </Box>
+      
+  </Box>
+  
   )
-
+  
 }
