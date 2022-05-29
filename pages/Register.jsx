@@ -32,7 +32,7 @@ export default function Register() {
         alignItems: 'center',
       }}
     >
-      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+      <Avatar sx={{ m: 2, bgcolor: 'secondary.main' }}>
         <LockOutlinedIcon />
       </Avatar>
       <Typography component="h1" variant="h5">
@@ -95,7 +95,7 @@ export default function Register() {
         <Grid container justifyContent="flex-end">
           <Grid item>
             <Link component={RouterLink} to="/login" variant="body2">
-              已经有账户了？点此登陆！
+              已经有账户了？  点此登陆！
             </Link>
           </Grid>
         </Grid>
