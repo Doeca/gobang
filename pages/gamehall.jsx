@@ -1,0 +1,1 @@
+//showS the gameroom status
