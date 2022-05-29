@@ -90,7 +90,7 @@ export default function Register() {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          账户注册
+          注册
         </Button>
         <Grid container justifyContent="flex-end">
           <Grid item>

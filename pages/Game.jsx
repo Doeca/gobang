@@ -2,9 +2,14 @@
 import ReactDOM from 'react-dom';
 import Board from '@sabaki/go-board';
 import { Goban } from '@sabaki/shudan';
-import signMap  from './signMap';
+import signMap from './signMap';
 const h = React.createElement;
 
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
+import { Outlet, Link } from "react-router-dom";
+import Appbar from '../components/Appbar.jsx';
 
 const chineseCoord = [
   '一',
@@ -233,7 +238,30 @@ class App extends Component {
 
 }
 
-export default function Game()
-{
+function Bang() {
   return h(App);
+}
+
+export default function Game() {
+  return (
+    <Box
+      sx={{
+        marginTop: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
+      <Container maxWidth="sm">
+        <CssBaseline />
+        <Appbar />
+        <Outlet />
+      </Container>
+
+
+      <Bang />
+    </Box>
+
+  )
+
 }

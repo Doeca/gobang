@@ -9,7 +9,7 @@ import {
 import Register from "./pages/Register.jsx"
 import Login from "./pages/Login.jsx"
 import Home from "./pages/Home.jsx"
-
+import Game from "./pages/Game.jsx"
 const root = ReactDOM.createRoot(
     document.getElementById("root")
 );
@@ -17,7 +17,7 @@ const root = ReactDOM.createRoot(
 root.render(
     <HashRouter>
         <Routes>
-            <Route path="/" element={<Home />}>
+            <Route path="/" element={<Game />}>
                 <Route path="login" element={<Login />} />
                 <Route path="register" element={<Register />} />
                 <Route
