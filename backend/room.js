@@ -4,7 +4,7 @@ import fs from 'fs'
 class Room {
     roomData = [];
     constructor() {
-
+        this.LoadFromFile();
     }
 
     LoadFromFile() {
@@ -12,7 +12,7 @@ class Room {
             if (fs.existsSync("./data/rooms.json")) {
                 let buf = fs.readFileSync("./data/rooms.json");
                 if (buf != '') {
-                    this.userData = JSON.parse(buf);
+                    this.roomData = JSON.parse(buf);
                     console.log(`Status: Room data file has been loaded`);
                 }
             }
@@ -28,7 +28,8 @@ class Room {
         //创建一个房间，写入当前玩家数据
         let room = {
             users: [],
-            operations: []
+            operations: [],
+            status: 0
         };
         room.id = this.roomData.length;
         u.info.sign = 1; //房主棋色为黑棋
@@ -62,14 +63,21 @@ class Room {
         if (r.mode == 0)
             return r;
         let i = r.index;
+
+
+        //如果该用户是房间用户之一，返回允许进入
+
+
         //如果该房间仅有一名玩家，返回允许进入并把此人加入玩家列表
         if (r.room.users.length < 2) {
+            if (r.room.users[0].id == info.id)
+                return { mode: 1, room: this.roomData[i] };
+            u.info.sign = -1;
             this.roomData[i].users.push(u.info);
-            return { mode: 1 };
+            return { mode: 1, room: this.roomData[i] };
         }
-        //如果该用户是房间用户之一，返回允许进入
         if (r.room.users[0].id == info.id || r.room.users[1].id == info.id)
-            return { mode: 1 };
+            return { mode: 1, room: this.roomData[i] };
 
         return { mode: 0, msg: "人数已满" };
     }

@@ -15,63 +15,75 @@ function GameLogic() {
         this.dot = '';
     }
 
-    this.pullData = (state, setState) => {
+    this.pullData = async(state, setState) => {
         let urlDomain = "127.0.0.1:8080";
         let room = this.gameInfo.room;
         let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
-        fetch(url).then(res => res.json())
-            .then(backData => {
-                if (backData.mode == 0)
-                    this.setError();
-                else if (backData.mode == 1) {
-                    this.gameInfo.room = backData.room;
+        let res = await fetch(url)
+        let backData = await res.json()
+        if (backData.mode == 0)
+            this.setError();
+        else if (backData.mode == 1) {
+            this.gameInfo.room = backData.room;
+        }
+
+        //如果用户只有一个人，那么渲染界面为等待玩家加入
+        let gi = backData.room;
+
+        if (gi.users.length < 2) {
+            this.dot = this.dot + ".";
+            if (this.dot == '......') this.dot = ".";
+            this.setTitle({ title: "等待玩家加入中" + this.dot, content: `房间ID： ${this.gameInfo.room.id}` });
+            return { status: 0 };
+        }
+
+        let newBoard, victory;
+        //如果已经达到人数且已经有操作的，那么开始渲染棋盘，判断游戏是否结束
+        if (gi.operations.length > 0) {
+            let data = gi.operations[gi.operations.length - 1];
+            if (state.board.get(data.vertex) == 0) {
+                //如果我的棋盘上没有这颗棋子，说明这是刚刚下的
+                newBoard = state.board.set(data.vertex, data.sign);
+                victory = this.isVictory(data.sign, newBoard.signMap, data.vertex);
+
+                if (victory) {
+                    let resStr = `${data.sign == 1?'黑':'白'}棋胜`;
+                    this.setTitle({ title: "游戏结束", content: resStr });
+                    this.setMsgBox({ title: "游戏结束", content: resStr });
+                    this.setOpen(true);
+                    clearInterval(this.gameInfo.interval);
+                    //游戏结束，关闭房间
+                    let room = { id: this.gameInfo.room.id }
+                    let url = `http://${urlDomain}/room/close?room=${base64.encode(JSON.stringify(room))}`;
+                    fetch(url);
+                } else {
+                    this.setTitle({
+                        type: "info",
+                        title: "游戏进行中",
+                        content: `当前回合，${data.sign == 1?'白':'黑'}棋行`
+                    });
                 }
 
-                //如果用户只有一个人，那么渲染界面为等待玩家加入
-                let gi = backData.room;
-                if (gi.users.length < 2) {
-                    this.dot = this.dot + ".";
-                    if (this.dot == '......') this.dot = ".";
-                    this.setTitle({ title: "等待玩家加入中" + this.dot, content: `房间ID： ${this.gameInfo.room.id}` });
-                    return;
-                }
-                //如果已经达到人数且已经有操作的，那么开始渲染棋盘，判断游戏是否结束
-                if (gi.operations.length > 0) {
-                    let data = gi.operations[gi.operations.length - 1];
-                    if (state.board.get(data.vertex) == 0) {
-                        //如果我的棋盘上没有这颗棋子，说明这是刚刚下的
-                        newBoard = state.board.set(data.vertex, data.sign);
-                        victory = this.isVictory(data.sign, newBoard.signMap, data.vertex);
-
-                        if (victory) {
-                            let resStr = `${data.sign == 1?'黑':'白'}棋胜`;
-                            this.setTitle({ title: "游戏结束", content: resStr });
-                            this.setMsgBox({ title: "游戏结束", content: resStr });
-                            this.setOpen(true);
-                            clearInterval(this.gameInfo.interval);
-                            //游戏结束，关闭房间
-                            let room = { id: this.gameInfo.room.id }
-                            let url = `http://${urlDomain}/room/close?room=${base64.encode(JSON.stringify(room))}`;
-                            fetch(url);
-                        } else {
-                            this.setTitle({ title: "游戏进行中", content: `当前回合，${data.sign == 1?'白':'黑'}棋行` });
-                        }
-
-                        setState({
-                            board: newBoard,
-                            selectedVertices: [
-                                data.vertex
-                            ],
-                            isBusy: victory
-                        });
-
+                return {
+                    status: 1,
+                    state: {
+                        board: newBoard,
+                        selectedVertices: [
+                            data.vertex
+                        ],
+                        isBusy: victory
                     }
                 }
-            })
-            .catch(e => {
-
+            }
+        } else {
+            this.setTitle({
+                type: "info",
+                title: "游戏进行中",
+                content: `当前回合，黑棋行`
             });
+        }
 
+        return { status: 0 };
 
     }
 
@@ -121,29 +133,30 @@ function GameLogic() {
 
     this.onlineHandle = (state, [x, y]) => {
         let gi = this.gameInfo.room;
+        let urlDomain = "127.0.0.1:8080";
 
         if (gi.users.length < 2)
-            return;
+            return { status: 0 }
 
         //如果操作记录不为0.判断上一步棋是不是本方下的
         if (gi.operations.length > 0) {
             let data = gi.operations[gi.operations.length - 1];
             if (this.gameInfo.sign == data.sign)
-                return;
+                return { status: 0 }
         } else if (this.gameInfo.sign == -1) {
-            return;
+            return { status: 0 }
         }
 
         let newBoard, victory
         if (state.board.get([x, y]) != 0)
-            return;
+            return { status: 0 }
 
         newBoard = state.board.set([x, y], this.gameInfo.sign);
         victory = this.isVictory(this.gameInfo.sign, newBoard.signMap, [x, y]);
 
         if (victory) {
             let resStr = `${state.sign == 1?'黑':'白'}棋胜`;
-            this.setTitle({ type: "info", title: "游戏结束", content: resStr });
+            this.setTitle({ title: "游戏结束", content: resStr });
             this.setMsgBox({ title: "游戏结束", content: resStr });
             this.setOpen(true);
             clearInterval(this.gameInfo.interval);
@@ -154,12 +167,11 @@ function GameLogic() {
             fetch(url);
 
         } else {
-            this.setTitle({ type: "info", title: "游戏进行中", content: `当前回合，${state.sign == 1?'白':'黑'}棋行` });
+            this.setTitle({ type: "info", title: "游戏进行中", content: `当前回合，${this.gameInfo.sign == 1?'白':'黑'}棋行` });
         }
 
 
         //向服务器上传本次操作数据
-        let urlDomain = "127.0.0.1:8080";
         let room = { id: this.gameInfo.room.id }
         let operation = {
             userID: User.info.id,

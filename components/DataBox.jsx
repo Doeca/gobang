@@ -24,20 +24,22 @@ export default class DataBox extends React.Component {
                     </DialogContentText>
                     <TextField
                         autoFocus
+                        required
                         label={this.props.textlabel}
                         type={this.props.texttype}
-                        name="text"
+                        name="roomID"
                         fullWidth
                         variant="standard"
+                        autoComplete="given-name"
+                        id="roomID"
                     />
-                    <Button type="submit" variant="contained">确认</Button>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={this.props.onCancel}>取消</Button>
-                    <Button type="submit" variant="contained">确认</Button>
+                    <Button onClick={this.props.onCancel} variant="contained">取消</Button>
+                    <Button onClick={this.props.onConfirm} variant="contained">确认</Button>
                 </DialogActions>
             </Dialog>
-           
+          
         ) 
     }
 }

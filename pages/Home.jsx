@@ -64,13 +64,8 @@ export default function Home() {
 
     let urlDomain = "127.0.0.1:8080";
     let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
-    console.log(url);
-    let jump = false;
     let result = await fetch(url)
     let data = await result.json();
-
-    console.log(data);
-
     if (data.mode == 0) {
       setMsgBox({ title: "错误", content: "创建房间失败，请稍后再试！" });
       setOpen(true);
@@ -78,43 +73,75 @@ export default function Home() {
     }
 
     else if (data.mode == 1) {
-      console.log(data);
       GameLogic.init();
       GameLogic.gameInfo.sign = 1; //房主默认下黑棋
       GameLogic.gameInfo.room = data.room;
       GameLogic.gameMode = 1;
       navigate("/game");
-      console.log(data);
     }
-
-
 
   }
 
 
   const modeC = () => {
+    if (!User.auth) {
+      setMsgBox({ title: "错误", content: "请先登陆再加入房间！" });
+      setOpen(true);
+      return;
+    }
+
     setdatOpen(true);
+  }
+
+
+  const confirmJoin = async () => {
+
+    setdatOpen(false);
+    let room = {
+      id: document.getElementById('roomID').value
+    }
+    console.log(room);
+
+    let urlDomain = "127.0.0.1:8080";
+    let url = `http://${urlDomain}/room/join?info=${base64.encode(JSON.stringify(User.info))}&room=${base64.encode(JSON.stringify(room))}`;
+    console.log(url);
+    let result = await fetch(url)
+    let retdata = await result.json();
+    if (retdata.mode == 1) {
+      if (retdata.room.status == 1) {
+        setMsgBox({ title: "错误", content: "该房间已关闭" });
+        setOpen(true);
+        return;
+      }
+
+      GameLogic.init();
+      if (retdata.room.users[0].id == User.info.id)
+        GameLogic.gameInfo.sign = 1;
+      else
+        GameLogic.gameInfo.sign = -1;
+      GameLogic.gameInfo.room = retdata.room;
+      GameLogic.gameMode = 1;
+      navigate("/game");
+    } else {
+      setMsgBox({ title: "错误", content: "加入房间失败，请稍后再试" });
+      setOpen(true);
+      return;
+    }
   }
 
   const cancelJoin = () => {
     setdatOpen(false);
   }
 
-  const confirmJoin = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data.get('text'));
-    setdatOpen(false);
-  }
 
   return (
 
 
     <Box>
       <MessageBox title={msgBox.title} content={msgBox.content} open={open} onClick={handleClose} />
-      <Box component="form" onSubmit={confirmJoin} noValidate sx={{ mt: 2 }}>
-        <DataBox title={datBox.title} content={datBox.content} open={datOpen} onCancel={cancelJoin}  textlabel="ID" texttype="number" />
-      </Box>
+
+      <DataBox title={datBox.title} content={datBox.content} open={datOpen} onCancel={cancelJoin} onConfirm={confirmJoin} textlabel="ID" texttype="number" />
+
       <Stack sx={{ marginTop: 15, marginBottom: 15 }} direction="column" spacing={10} justifyContent="center" alignItems="center">
 
         <Button onClick={modeA} variant="contained">单机双人对战</Button>

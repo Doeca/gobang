@@ -20,8 +20,7 @@ function User() {
                 if (data.mode == 0)
                     setMsgBox({ title: "登陆失败", content: "账号或密码错误，请重试！" });
                 else if (data.mode == 1) {
-                    data.info.nick = decodeURIComponent(data.info.nick);
-                    setMsgBox({ title: "登陆成功", content: `欢迎回来：${data.info.nick}` });
+                    setMsgBox({ title: "登陆成功", content: `欢迎回来：${decodeURIComponent(data.info.nick)}` });
                     this.auth = true;
                     this.info = data.info;
                 }

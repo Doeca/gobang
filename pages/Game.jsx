@@ -60,9 +60,14 @@ class Bang extends React.Component {
     }
 
     if (GameLogic.gameMode == 1) {
-      let intervalID = setInterval(() => {
-        GameLogic.pullData(this.state, this.setState);
-      }, 500);
+      let intervalID = setInterval(async () => {
+        let ret = await GameLogic.pullData(this.state);
+
+        if (ret.status == 1) {
+          console.log(ret);
+          this.setState(ret.state);
+        }
+      }, 1000);
       GameLogic.gameInfo.interval = intervalID;
     }
 
@@ -121,10 +126,10 @@ class Bang extends React.Component {
             //游戏逻辑交付game.js进行处理
             //提交坐标和当前棋盘给game.js，然后点击事件
             let res;
-            if (gameMode == 0)
+            if (GameLogic.gameMode == 0)
               res = GameLogic.gameHandle(this.state, [x, y]);
             else
-              res = GameLogic.onlionHandle(this.state, [x, y]);
+              res = GameLogic.onlineHandle(this.state, [x, y]);
             if (res.status == 1)
               this.setState(res.data);
           }
