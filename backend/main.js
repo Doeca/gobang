@@ -3,11 +3,13 @@ import Room from './room.js'
 import express from 'express'
 const app = express()
 
-var server = app.listen(8080, function() {
+var server = app.listen(8082, function() {
     var host = server.address().address
     var port = server.address().port
     console.log("应用实例，访问地址为 http://%s:%s", host, port)
 })
+
+app.use('/', express.static('../public'));
 
 // 设置允许跨域访问
 app.all('*', function(req, res, next) {

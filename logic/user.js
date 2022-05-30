@@ -1,12 +1,10 @@
 ﻿import * as React from 'react';
 import base64 from 'base-64'
-
+import urlDomain from '../components/Url.jsx';
 
 function User() {
     this.auth = false;
     this.info = {};
-
-    let urlDomain = "127.0.0.1:8080";
 
     this.login = (act, pwd, setOpen, setMsgBox) => {
 

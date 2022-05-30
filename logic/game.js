@@ -1,5 +1,6 @@
 ﻿import User from "./user"
 import base64 from 'base-64'
+import urlDomain from '../components/Url.jsx';
 
 function GameLogic() {
 
@@ -16,7 +17,6 @@ function GameLogic() {
     }
 
     this.pullData = async(state, setState) => {
-        let urlDomain = "127.0.0.1:8080";
         let room = this.gameInfo.room;
         let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
         let res = await fetch(url)
@@ -133,8 +133,6 @@ function GameLogic() {
 
     this.onlineHandle = (state, [x, y]) => {
         let gi = this.gameInfo.room;
-        let urlDomain = "127.0.0.1:8080";
-
         if (gi.users.length < 2)
             return { status: 0 }
 

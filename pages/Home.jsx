@@ -14,6 +14,7 @@ import { styled } from '@mui/material/styles';
 import base64 from 'base-64'
 import MessageBox from "../components/MessageBox.jsx"
 import DataBox from "../components/DataBox.jsx"
+import urlDomain from '../components/Url.jsx';
 
 import GameLogic from '../logic/game'
 import User from '../logic/user'
@@ -62,7 +63,6 @@ export default function Home() {
       return;
     }
 
-    let urlDomain = "127.0.0.1:8080";
     let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
     let result = await fetch(url)
     let data = await result.json();
@@ -102,7 +102,6 @@ export default function Home() {
     }
     console.log(room);
 
-    let urlDomain = "127.0.0.1:8080";
     let url = `http://${urlDomain}/room/join?info=${base64.encode(JSON.stringify(User.info))}&room=${base64.encode(JSON.stringify(room))}`;
     console.log(url);
     let result = await fetch(url)
