@@ -1,19 +1,22 @@
-﻿import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+﻿
+import * as React from 'react';
 import Board from '@sabaki/go-board';
-import { Goban } from '@sabaki/shudan';
+import { BoundedGoban } from '@sabaki/shudan';
 import signMap from './signMap';
-const h = React.createElement;
-
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Container from '@mui/material/Container';
-import { Outlet, Link } from "react-router-dom";
-import Appbar from '../components/Appbar.jsx';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Stack from '@mui/material/Stack';
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import { maxWidth, maxHeight } from '@mui/system';
+import GameLogic from '../logic/game'
+import MessageBox from "../components/MessageBox.jsx"
 
+
+const h = React.createElement;
 const chineseCoord = [
   '一',
   '二',
@@ -36,47 +39,18 @@ const chineseCoord = [
   '十九'
 ]
 
-const createTwoWayCheckBox = component => ({ stateKey, text }) =>
-  h(
-    'label', {
-    style: {
-      display: 'flex',
-      alignItems: 'center'
-    }
-  },
-
-    h('input', {
-      style: { marginRight: '.5em' },
-      type: 'checkbox',
-      checked: component.state[stateKey],
-      onClick: () => component.setState(s => ({
-        [stateKey]: !s[stateKey]
-      }))
-    }),
-
-    h('span', { style: { userSelect: 'none' } }, text)
-  )
-
-class Title extends Component {
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return h('h1', {}, this.props.title)
-  }
-}
-
-class App extends Component {
+class Bang extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
       board: new Board(signMap),
-      vertexSize: 27,
+      maxWidth: 500,
+      maxHeight: 500,
+      maxVertexSize: 23,
       showCoordinates: true,
       alternateCoordinates: false,
-      fuzzyStonePlacement: true,
+      fuzzyStonePlacement: false,
       animateStonePlacement: true,
       showLines: false,
       showSelection: false,
@@ -85,84 +59,21 @@ class App extends Component {
       sign: 1
     }
 
-    //this.state.board.fromDimensions(15)
-    //console.log(this.state.board.signMap)
-    this.CheckBox = createTwoWayCheckBox(this)
+    if (GameLogic.gameMode == 1) {
+      let intervalID = setInterval(() => {
+        GameLogic.pullData(this.state, this.setState);
+      }, 500);
+      GameLogic.gameInfo.interval = intervalID;
+    }
+
   }
 
-  isVictory(sign, map, vertex) {
-
-    let count = 0
-    let x = vertex[0]
-    let y = vertex[1]
-
-    while (--x > 0)
-      if (map[y][x] == sign)
-        count++
-      else break
-
-
-    x = vertex[0]
-    while (++x < 15)
-      if (map[y][x] == sign)
-        count++
-      else break
-    if (count >= 4) return true;
-
-
-
-    count = 0
-    x = vertex[0]
-    y = vertex[1]
-    while (--y > 0)
-
-      if (map[y][x] === sign)
-        count++
-      else break
-    y = vertex[1]
-    while (++y < 15)
-      if (map[y][x] === sign)
-        count++
-      else break
-    if (count >= 4) return true;
-
-
-    count = 0
-    x = vertex[0]
-    y = vertex[1]
-    while (--x > 0 && --y > 0)
-      if (map[y][x] === sign)
-        count++
-      else break
-    x = vertex[0]
-    y = vertex[1]
-    while (++x < 15 && ++y < 15)
-      if (map[y][x] === sign)
-        count++
-      else break
-    if (count >= 4) return true;
-
-    count = 0
-    x = vertex[0]
-    y = vertex[1]
-    while (--x > 0 && ++y < 15)
-      if (map[y][x] === sign)
-        count++
-      else break
-    x = vertex[0]
-    y = vertex[1]
-    while (++x < 15 && --y > 0)
-      if (map[y][x] === sign)
-        count++
-      else break
-    if (count >= 4) return true;
-
-    return false;
-  }
 
   render() {
     let {
-      vertexSize,
+      maxWidth,
+      maxHeight,
+      maxVertexSize,
       showCoordinates,
       alternateCoordinates,
       fuzzyStonePlacement,
@@ -187,15 +98,16 @@ class App extends Component {
         }
       },
       ),
-      h(Title, { title: this.state.title }),
+
       h(
         'div', {},
-        h(Goban, {
+        h(BoundedGoban, {
           innerProps: {
             onContextMenu: evt => evt.preventDefault()
           },
-
-          vertexSize,
+          maxWidth,
+          maxHeight,
+          maxVertexSize,
           animate: true,
           busy: this.state.isBusy,
           coordX: alternateCoordinates ? i => chineseCoord[i] : undefined,
@@ -206,26 +118,17 @@ class App extends Component {
           animateStonePlacement,
           selectedVertices: selectedVertices,
           onVertexMouseUp: (evt, [x, y]) => {
-            let newBoard, victory, title
-            try {
-              if (this.state.board.get([x, y]) != 0)
-                throw 101;
-              newBoard = this.state.board.set([x, y], this.state.sign)
-              victory = this.isVictory(this.state.sign, newBoard.signMap, [x, y])
-
-              title = this.state.title
-              if (victory)
-                title += " , " + (this.state.sign === 1 ? "黑棋胜" : "白棋胜")
-
-              this.setState({ board: newBoard, sign: this.state.sign * -1, selectedVertices: [[x, y]], isBusy: victory, title: title })
-
-            } catch (e) {
-
-            }
-
+            //游戏逻辑交付game.js进行处理
+            //提交坐标和当前棋盘给game.js，然后点击事件
+            let res;
+            if (gameMode == 0)
+              res = GameLogic.gameHandle(this.state, [x, y]);
+            else
+              res = GameLogic.onlionHandle(this.state, [x, y]);
+            if (res.status == 1)
+              this.setState(res.data);
           }
         }),
-
         alternateCoordinates &&
         h(
           'style', {},
@@ -240,14 +143,24 @@ class App extends Component {
 
 }
 
-function Bang()
-{
-  return h(App);
-}
 
-export default function Game()
-{
-  return(
+export default function Game() {
+
+
+  let navigate = useNavigate();
+  const [msgBox, setMsgBox] = React.useState({ title: "", content: "" });
+  const [open, setOpen] = React.useState(false);
+  const [title, setTitle] = React.useState({ type: "info", title: "游戏进行中", content: "当前回合，黑棋行" });
+  const handleClose = () => {
+    setOpen(false);
+  }
+  const setError = () => {
+    navigate('/');
+  }
+
+  GameLogic.setInterface(setOpen, setMsgBox, setTitle, setError);
+
+  return (
     <Box
       sx={{
         marginTop: 0,
@@ -256,70 +169,73 @@ export default function Game()
         alignItems: 'center',
       }}
     >
-      <Container maxWidth="sm">
-       <CssBaseline  />
-         <Appbar />
-          <Outlet />
-      </Container>
+      <MessageBox title={msgBox.title} content={msgBox.content} open={open} onClick={handleClose} />
+      <Stack sx={{ width: '100%' }} spacing={2}>
 
-      
+        <Alert severity={title.type}>
+          <AlertTitle>{title.title}</AlertTitle>
+          {title.content}
+        </Alert>
+      </Stack>
+
       <Box
-      sx={{
-        marginTop: 4,
-        display: 'flex',
-        alignItems: 'center',
-      }}
+        sx={{
+          marginTop: 4,
+          display: 'flex',
+          alignItems: 'center',
+        }}
       >
-        <Typography component="h1" variant="h4">
-        游戏中
-        </Typography>
-        
+
+
+
 
       </Box>
-      
+
       <Bang />
 
       <Box
-      sx={{
-        marginTop: 6,
-        display: 'flex',
-        alignItems: 'center',
-      }}
+        sx={{
+          marginTop: 6,
+          display: 'flex',
+          alignItems: 'center',
+        }}
       >
-        <Grid container spacing={7}>
-          <Grid item>
-            <Button 
-            variant="contained" 
-            color="warning"
-            size="large"
-            >
-             投降
-            </Button>
+
+        {GameLogic.gameMode != 0 &&
+          <Grid container spacing={7}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="warning"
+                size="large"
+              >
+                投降
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+              >
+                退出游戏
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+              >
+                和棋
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item>
-            <Button 
-            variant="contained" 
-            color="primary"
-            size="large"
-            >
-              退出游戏
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button 
-            variant="contained" 
-            color="success"
-            size="large"
-            >
-              和棋
-            </Button>
-          </Grid>
-        </Grid>
-          
+        }
       </Box>
-      
-  </Box>
-  
+
+    </Box>
+
   )
-  
+
 }

@@ -15,6 +15,8 @@ import AlbumIcon from '@mui/icons-material/Album';
 import User from "../logic/user.js"
 import { Link } from "react-router-dom";
 
+
+
 export default function Appbar() {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -27,6 +29,11 @@ export default function Appbar() {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const handleLogout = () =>{
+        User.logout();
+        setAnchorEl(null);
+    }
 
     return (
         <Box sx={{ flexGrow: 1 }} >
@@ -77,7 +84,7 @@ export default function Appbar() {
                             onClose={handleClose}
                         >
                             {User.auth
-                                ? <MenuItem onClick={handleClose} component={Link} to="/logout">注销</MenuItem>
+                                ? <MenuItem onClick={handleLogout} component={Link} to="/">注销</MenuItem>
                                 : <MenuItem onClick={handleClose} component={Link} to="/login">登陆</MenuItem>
                             }
 

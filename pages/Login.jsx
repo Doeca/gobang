@@ -1,33 +1,44 @@
 ﻿import * as React from 'react';
+import { Link as RouterLink, useNavigate, } from "react-router-dom";
+
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+
+import MessageBox from "../components/MessageBox.jsx"
+
 import User from '../logic/user';
-import { Link as RouterLink } from "react-router-dom";
+
+
+
 
 export default function Login() {
+  let navigate = useNavigate();
+  const [msgBox, setMsgBox] = React.useState({ title: "", content: "" });
+  const [open, setOpen] = React.useState(false);
+  const handleClose = (event) => {
+    event.preventDefault();
+    if (User.auth) {
+      navigate('/');
+    } else
+      setOpen(false);
+
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      username: data.get('username'),
-      password: data.get('password'),
-    });
-    User.Login()
+    User.login(data.get('username'), data.get('password'), setOpen, setMsgBox)
 
   };
 
-  return (
 
+  return (
     <Box
       sx={{
         marginTop: 8,
@@ -36,11 +47,14 @@ export default function Login() {
         alignItems: 'center',
       }}
     >
+
+      <MessageBox title={msgBox.title} content={msgBox.content} open={open} onClick={handleClose} />
+
       <Avatar sx={{ m: 2, bgcolor: 'secondary.main' }}>
         <LockOutlinedIcon />
       </Avatar>
       <Typography component="h1" variant="h5">
-       账户登陆
+        账户登陆
       </Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
         <TextField
@@ -82,7 +96,7 @@ export default function Login() {
         </Grid>
       </Box>
     </Box>
-
-
   );
+
+
 }
