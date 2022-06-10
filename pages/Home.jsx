@@ -37,6 +37,7 @@ function Copyright() {
 
 export default function Home() {
   const navigate = useNavigate();
+  const [onlyc, setOnlyc] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [msgBox, setMsgBox] = React.useState({ title: "", content: "" });
   const [datOpen, setdatOpen] = React.useState(false);
@@ -45,6 +46,10 @@ export default function Home() {
 
   const handleClose = () => {
     setOpen(false);
+    if (onlyc) {
+      setOnlyc(false);
+      return;
+    }
     if (!User.auth) {
       navigate('/login');
     }
@@ -62,7 +67,6 @@ export default function Home() {
       setOpen(true);
       return;
     }
-
     let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
     let result = await fetch(url)
     let data = await result.json();
@@ -93,38 +97,70 @@ export default function Home() {
     setdatOpen(true);
   }
 
+  const modeD = () => {
+    setOnlyc(true);
+    setdatOpen(true);
+  }
+
 
   const confirmJoin = async () => {
-
     setdatOpen(false);
     let room = {
       id: document.getElementById('roomID').value
     }
-    console.log(room);
 
-    let url = `http://${urlDomain}/room/join?info=${base64.encode(JSON.stringify(User.info))}&room=${base64.encode(JSON.stringify(room))}`;
-    console.log(url);
-    let result = await fetch(url)
-    let retdata = await result.json();
-    if (retdata.mode == 1) {
-      if (retdata.room.status == 1) {
-        setMsgBox({ title: "错误", content: "该房间已关闭" });
+    if (onlyc) {
+      //观战模式
+      let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
+      let result = await fetch(url)
+      let retdata = await result.json();
+      if (retdata.mode == 1) {
+        if (retdata.room.status == 1) {
+          setMsgBox({ title: "错误", content: "该房间已关闭" });
+          setOpen(true);
+          return;
+        } else if (retdata.room.users.length != 2) {
+          setMsgBox({ title: "错误", content: "该房间对局还未开始" });
+          setOpen(true);
+          return;
+        }
+        GameLogic.init();
+        GameLogic.gameInfo.room = retdata.room;
+        GameLogic.gameMode = 2;
+        setOnlyc(false);
+        navigate("/game");
+      } else {
+        setMsgBox({ title: "错误", content: "房间不存在" });
         setOpen(true);
         return;
       }
 
-      GameLogic.init();
-      if (retdata.room.users[0].id == User.info.id)
-        GameLogic.gameInfo.sign = 1;
-      else
-        GameLogic.gameInfo.sign = -1;
-      GameLogic.gameInfo.room = retdata.room;
-      GameLogic.gameMode = 1;
-      navigate("/game");
+
     } else {
-      setMsgBox({ title: "错误", content: "加入房间失败，请稍后再试" });
-      setOpen(true);
-      return;
+
+      let url = `http://${urlDomain}/room/join?info=${base64.encode(JSON.stringify(User.info))}&room=${base64.encode(JSON.stringify(room))}`;
+      let result = await fetch(url)
+      let retdata = await result.json();
+      if (retdata.mode == 1) {
+        if (retdata.room.status == 1) {
+          setMsgBox({ title: "错误", content: "该房间已关闭" });
+          setOpen(true);
+          return;
+        }
+
+        GameLogic.init();
+        if (retdata.room.users[0].id == User.info.id)
+          GameLogic.gameInfo.sign = 1;
+        else
+          GameLogic.gameInfo.sign = -1;
+        GameLogic.gameInfo.room = retdata.room;
+        GameLogic.gameMode = 1;
+        navigate("/game");
+      } else {
+        setMsgBox({ title: "错误", content: "加入房间失败，请稍后再试" });
+        setOpen(true);
+        return;
+      }
     }
   }
 
@@ -149,6 +185,7 @@ export default function Home() {
 
         <Button onClick={modeC} variant="contained">加入在线房间</Button>
 
+        <Button onClick={modeD} variant="contained">观战</Button>
       </Stack>
       <Copyright />
 

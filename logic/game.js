@@ -4,8 +4,6 @@ import urlDomain from '../components/Url.jsx';
 
 function GameLogic() {
 
-
-
     this.init = () => {
         this.gameMode = 0; //定义单机或网络对战
         this.gameInfo = {
@@ -13,10 +11,11 @@ function GameLogic() {
             sign: 1,
             interval: 0
         }
+        this.watchLoded = false;
         this.dot = '';
     }
 
-    this.pullData = async(state, setState) => {
+    this.pullData = async(state) => {
         let room = this.gameInfo.room;
         let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
         let res = await fetch(url)
@@ -87,6 +86,52 @@ function GameLogic() {
 
     }
 
+    this.syncData = async(state) => {
+        //用于进入房间时同步当前棋盘已经下过的棋
+        let room = this.gameInfo.room;
+        let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
+        let res = await fetch(url)
+        let backData = await res.json()
+        if (backData.mode == 0)
+            this.setError();
+        else if (backData.mode == 1) {
+            this.gameInfo.room = backData.room;
+        }
+        this.watchLoded = true;
+        //如果已经达到人数且已经有操作的，那么开始渲染棋盘，判断游戏是否结束
+        if (gi.operations.length > 0) {
+            let newBoard, sign = 1,
+                finalVertx;
+            newBoard = state.board;
+            gi.operations.forEach((v, i) => {
+                newBoard = newBoard.set(v.vertex, sign);
+                sign *= -1;
+                finalVertx = v.vertex;
+            });
+
+            this.setTitle({ type: "info", title: "游戏进行中", content: `当前回合，${sign == 1?'黑':'白'}棋行` });
+
+            return {
+                status: 1,
+                state: {
+                    board: newBoard,
+                    selectedVertices: [
+                        finalVertx
+                    ],
+                    isBusy: false
+                }
+            }
+        } else {
+            this.setTitle({
+                type: "info",
+                title: "游戏进行中",
+                content: `当前回合，黑棋行`
+            });
+        }
+        return { status: 0 };
+
+    }
+
     this.setInterface = (setOpen, setMsgBox, setTitle, setError) => {
         this.setOpen = setOpen;
         this.setMsgBox = setMsgBox;
@@ -153,7 +198,7 @@ function GameLogic() {
         victory = this.isVictory(this.gameInfo.sign, newBoard.signMap, [x, y]);
 
         if (victory) {
-            let resStr = `${state.sign == 1?'黑':'白'}棋胜`;
+            let resStr = `${this.gameInfo.sign == 1?'黑':'白'}棋胜`;
             this.setTitle({ title: "游戏结束", content: resStr });
             this.setMsgBox({ title: "游戏结束", content: resStr });
             this.setOpen(true);

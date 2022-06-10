@@ -2,7 +2,6 @@
 import * as React from 'react';
 import Board from '@sabaki/go-board';
 import { BoundedGoban } from '@sabaki/shudan';
-import signMap from './signMap';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -14,6 +13,7 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { maxWidth, maxHeight } from '@mui/system';
 import GameLogic from '../logic/game'
 import MessageBox from "../components/MessageBox.jsx"
+import signMap from './signMap';
 
 
 const h = React.createElement;
@@ -42,6 +42,10 @@ const chineseCoord = [
 class Bang extends React.Component {
   constructor(props) {
     super(props)
+    let signMap = new Array();
+    for (var k = 0; k < 15; k++) {
+      signMap.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
 
     this.state = {
       board: new Board(signMap),
@@ -63,6 +67,21 @@ class Bang extends React.Component {
       let intervalID = setInterval(async () => {
         let ret = await GameLogic.pullData(this.state);
 
+        if (ret.status == 1) {
+          console.log(ret);
+          this.setState(ret.state);
+        }
+      }, 1000);
+      GameLogic.gameInfo.interval = intervalID;
+    }
+
+    if (GameLogic.gameMode == 2) {
+
+      let intervalID = setInterval(async () => {
+        if (GameLogic.watchLoded == false) {
+          await GameLogic.syncData();
+        }
+        let ret = await GameLogic.pullData(this.state);
         if (ret.status == 1) {
           console.log(ret);
           this.setState(ret.state);
@@ -128,8 +147,11 @@ class Bang extends React.Component {
             let res;
             if (GameLogic.gameMode == 0)
               res = GameLogic.gameHandle(this.state, [x, y]);
-            else
+            else if (GameLogic.gameMode == 1)
               res = GameLogic.onlineHandle(this.state, [x, y]);
+            else
+              res = { status: 0 }; //观战模式不执行任何操作
+
             if (res.status == 1)
               this.setState(res.data);
           }
