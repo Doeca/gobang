@@ -39,7 +39,7 @@ export default function Register() {
       u = true;
     }
     else if (nick == '') {
-      setMsgBox({ title: "错误", content: "昵称不得为空" });
+      setMsgBox({ title: "错误", content: "昵称不得为空!" });
       u = true;
     }
     return u;

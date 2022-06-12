@@ -109,7 +109,7 @@ export default function Home() {
           setOpen(true);
           return;
         } else if (retdata.room.users.length != 2) {
-          setMsgBox({ title: "错误", content: "该房间对局还未开始" });
+          setMsgBox({ title: "错误", content: "该房间对局还未开始捏" });
           setOpen(true);
           return;
         }
@@ -119,7 +119,7 @@ export default function Home() {
         setOnlyc(false);
         navigate("/game");
       } else {
-        setMsgBox({ title: "错误", content: "房间不存在" });
+        setMsgBox({ title: "错误", content: "该房间不存在" });
         setOpen(true);
         return;
       }
@@ -168,13 +168,13 @@ export default function Home() {
 
       <Stack sx={{ marginTop: 15, marginBottom: 15 }} direction="column" spacing={10} justifyContent="center" alignItems="center">
 
-        <Button onClick={modeA} variant="contained">单机双人对战</Button>
+        <Button onClick={modeA} variant="contained">本地双人对战</Button>
 
         <Button onClick={modeB} variant="contained">创建在线房间</Button>
 
         <Button onClick={modeC} variant="contained">加入在线房间</Button>
 
-        <Button onClick={modeD} variant="contained">观战</Button>
+        <Button onClick={modeD} variant="contained">在线观战</Button>
       </Stack>
 
       <Footer />
