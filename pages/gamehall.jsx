@@ -179,8 +179,8 @@ const rows = [
   createData('001', '0', '空闲中'),
   createData('002', '1', '等待中'),
   createData('003', '2', '游戏中'),
-  createData('004', '3', '游戏观战中'),
-  createData('005', '6', '游戏观战中'),
+  createData('004', '3', '观战中'),
+  createData('005', '6', '观战中'),
   createData('006', '0', '空闲中'),
   createData('007', '1', '等待中'),
 ];
