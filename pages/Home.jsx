@@ -15,24 +15,13 @@ import base64 from 'base-64'
 import MessageBox from "../components/MessageBox.jsx"
 import DataBox from "../components/DataBox.jsx"
 import urlDomain from '../components/Url.jsx';
+import Footer from '../components/Footer.jsx'
 
 import GameLogic from '../logic/game'
 import User from '../logic/user'
 
 
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 
 export default function Home() {
@@ -187,8 +176,8 @@ export default function Home() {
 
         <Button onClick={modeD} variant="contained">观战</Button>
       </Stack>
-      <Copyright />
 
+      <Footer />
     </Box >
 
 

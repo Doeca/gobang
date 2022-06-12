@@ -72,6 +72,10 @@ class User {
         if (u.mode == 0)
             return u;
     }
+
+    UserNum() {
+        return { mode: 1, num: this.userData.length }
+    }
 }
 
 export default (new User);

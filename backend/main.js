@@ -43,6 +43,15 @@ app.get("/user/register", (req, res) => {
     }
 });
 
+app.get("/user/num", (req, res) => {
+    let out = User.UserNum();
+    res.send(out);
+    if (out.mode == 1) {
+        //cookie 系统待做
+        //res.cookie()
+    }
+});
+
 // 房间系统（网络对战用）
 app.get("/room/create", (req, res) => {
     let info = JSON.parse(Buffer.from(req.query.info, "base64").toString('utf-8'));

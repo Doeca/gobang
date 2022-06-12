@@ -8,11 +8,9 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-
 import MessageBox from "../components/MessageBox.jsx"
-
 import User from '../logic/user';
-
+import Footer from '../components/Footer.jsx'
 
 export default function Register() {
   let navigate = useNavigate();
@@ -143,7 +141,9 @@ export default function Register() {
             </Link>
           </Grid>
         </Grid>
+       
       </Box>
+      <Footer />
     </Box>
 
   );

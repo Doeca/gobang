@@ -13,7 +13,6 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { maxWidth, maxHeight } from '@mui/system';
 import GameLogic from '../logic/game'
 import MessageBox from "../components/MessageBox.jsx"
-import signMap from './signMap';
 
 
 const h = React.createElement;

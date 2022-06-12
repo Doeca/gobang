@@ -9,10 +9,8 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-
-
 import MessageBox from "../components/MessageBox.jsx"
-
+import Footer from '../components/Footer.jsx'
 import User from '../logic/user';
 
 
@@ -94,7 +92,10 @@ export default function Login() {
             </Link>
           </Grid>
         </Grid>
+
+
       </Box>
+      <Footer />
     </Box>
   );
 
