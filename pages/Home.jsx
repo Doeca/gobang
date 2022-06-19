@@ -46,9 +46,8 @@ export default function Home() {
 
   const modeA = () => {
     GameLogic.init();
-    navigate("/game")
+    navigate("/game") //直接加入游戏
   }
-
 
   const modeB = async () => {
     if (!User.auth) {
@@ -75,7 +74,6 @@ export default function Home() {
 
   }
 
-
   const modeC = () => {
     if (!User.auth) {
       setMsgBox({ title: "错误", content: "请先登陆再加入房间！" });
@@ -97,14 +95,14 @@ export default function Home() {
     let room = {
       id: document.getElementById('roomID').value
     }
-
-    if (onlyc) {
+    //处理进入的在线房间的模式
+    if (onlyc) { //如果是观战模式
       //观战模式
       let url = `http://${urlDomain}/room/read?room=${base64.encode(JSON.stringify(room))}`;
       let result = await fetch(url)
       let retdata = await result.json();
-      if (retdata.mode == 1) {
-        if (retdata.room.status == 1) {
+      if (retdata.mode == 1) {//判断该房间是否存在
+        if (retdata.room.status == 1) {//判断是否可以观战
           setMsgBox({ title: "错误", content: "该房间已关闭" });
           setOpen(true);
           return;
@@ -113,19 +111,20 @@ export default function Home() {
           setOpen(true);
           return;
         }
+        //全部满足则进行观战
         GameLogic.init();
-        GameLogic.gameInfo.room = retdata.room;
-        GameLogic.gameMode = 2;
-        setOnlyc(false);
+        GameLogic.gameInfo.room = retdata.room; //传递房间号
+        GameLogic.gameMode = 2; //设置为观战模式
+        setOnlyc(false);  
         navigate("/game");
-      } else {
+      } else { //房间不存在
         setMsgBox({ title: "错误", content: "该房间不存在" });
         setOpen(true);
         return;
       }
 
 
-    } else {
+    } else { //反之则是对战模式
 
       let url = `http://${urlDomain}/room/join?info=${base64.encode(JSON.stringify(User.info))}&room=${base64.encode(JSON.stringify(room))}`;
       let result = await fetch(url)
@@ -139,12 +138,12 @@ export default function Home() {
 
         GameLogic.init();
         if (retdata.room.users[0].id == User.info.id)
-          GameLogic.gameInfo.sign = 1;
+          GameLogic.gameInfo.sign = 1; //确定玩家的先后手 
         else
           GameLogic.gameInfo.sign = -1;
-        GameLogic.gameInfo.room = retdata.room;
-        GameLogic.gameMode = 1;
-        navigate("/game");
+        GameLogic.gameInfo.room = retdata.room; //传递房间号
+        GameLogic.gameMode = 1;  //设置为操作模式
+        navigate("/game"); //放出棋盘
       } else {
         setMsgBox({ title: "错误", content: "加入房间失败，请稍后再试" });
         setOpen(true);
