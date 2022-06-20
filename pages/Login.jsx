@@ -52,7 +52,7 @@ export default function Login() {
         <LockOutlinedIcon />
       </Avatar>
       <Typography component="h1" variant="h5">
-        账户登陆
+        用户登陆
       </Typography>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
         <TextField
@@ -88,7 +88,7 @@ export default function Login() {
         <Grid container justifyContent="flex-end">
           <Grid item>
             <Link component={RouterLink} to="/register" variant="body2">
-              {"没有账户？   点此注册！"}
+              {"没有账户？   点此注册^_^！"}
             </Link>
           </Grid>
         </Grid>

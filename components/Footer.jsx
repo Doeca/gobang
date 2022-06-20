@@ -1,4 +1,5 @@
-﻿import * as React from 'react';
+﻿//show the runing situation
+import * as React from 'react';
 import Typography from '@mui/material/Typography';
 import urlDomain from '../components/Url.jsx';
 
