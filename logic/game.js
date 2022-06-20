@@ -100,6 +100,7 @@ function GameLogic() {
         }
         this.watchLoded = true;
         //如果已经达到人数且已经有操作的，那么开始渲染棋盘，判断游戏是否结束
+        let gi = backData.room;
         if (gi.operations.length > 0) {
             let newBoard, sign = 1,
                 finalVertx;
@@ -282,7 +283,7 @@ function GameLogic() {
             fetch(url);
 
         } else {
-            this.setTitle({ type: "info", title: `游戏进行中，房间ID：${this.gameInfo.room.id}`, content: `当前回合，${this.gameInfo.sign == 1?'白':'黑'}棋行` });
+            this.setTitle({ type: "info", title: `游戏进行中，房间ID：${this.gameInfo.room.id}`, content: `当前回合，${aSign == 1?'白':'黑'}棋行` });
         }
 
 

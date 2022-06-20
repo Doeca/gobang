@@ -65,28 +65,34 @@ class Bang extends React.Component {
 
     if (GameLogic.gameMode == 1) {
       let intervalID = setInterval(async () => {
+        if (window.location.href.indexOf("game") == -1)
+          clearInterval(intervalID);
         let ret = await GameLogic.pullData(this.state);
 
         if (ret.status == 1) {
           console.log(ret);
           this.setState(ret.state);
         }
-      }, 1000);
+      }, 500);
       GameLogic.gameInfo.interval = intervalID;
     }
 
     if (GameLogic.gameMode == 2) {
 
       let intervalID = setInterval(async () => {
+        if (window.location.href.indexOf("game") == -1)
+          clearInterval(intervalID);
+
+
         if (GameLogic.watchLoded == false) {
-          await GameLogic.syncData();
+          await GameLogic.syncData(this.state);
         }
         let ret = await GameLogic.pullData(this.state);
         if (ret.status == 1) {
           console.log(ret);
           this.setState(ret.state);
         }
-      }, 1000);
+      }, 500);
       GameLogic.gameInfo.interval = intervalID;
     }
 
@@ -164,19 +170,19 @@ class Bang extends React.Component {
               //人机模式，先人下，后机器下
               res = GameLogic.aiHandle(this.state, [x, y], 1);
 
-              console.log("人的坐标：", [x,y]);
-              console.log("人下棋结果：", res);
+
               if (res.status == 1)
                 this.setState(res.data);
 
-              console.log("机器下棋间隔");
+
               if (res.data.isBusy != true) {
                 let cords = AIPlay(res.data.board.signMap);
-                console.log("机器下的坐标：", cords);
-                res = GameLogic.aiHandle(this.state, cords, -1);
-                console.log("机器下棋结果：", res);
-                if (res.status == 1)
-                  this.setState(res.data);
+                setTimeout(() => {
+                  res = GameLogic.aiHandle(this.state, cords, -1);
+                  if (res.status == 1)
+                    this.setState(res.data);
+                }, 1000);
+
               }
             }
           }
