@@ -53,6 +53,13 @@ app.get("/user/num", (req, res) => {
 });
 
 // 房间系统（网络对战用）
+app.get("/pveroom/create", (req, res) => {
+    let info = JSON.parse(Buffer.from(req.query.info, "base64").toString('utf-8'));
+    let out = Room.CreatePveRoom(info);
+    res.send(out);
+});
+
+
 app.get("/room/create", (req, res) => {
     let info = JSON.parse(Buffer.from(req.query.info, "base64").toString('utf-8'));
     let out = Room.CreateRoom(info);

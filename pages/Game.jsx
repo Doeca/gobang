@@ -14,6 +14,7 @@ import { maxWidth, maxHeight } from '@mui/system';
 import GameLogic from '../logic/game'
 import MessageBox from "../components/MessageBox.jsx"
 
+import AIPlay from '../logic/AIPlay.js'
 
 const h = React.createElement;
 const chineseCoord = [
@@ -89,6 +90,10 @@ class Bang extends React.Component {
       GameLogic.gameInfo.interval = intervalID;
     }
 
+    if (GameLogic.gameMode == 3) {
+      GameLogic.pveInit();
+    }
+
   }
 
 
@@ -143,16 +148,37 @@ class Bang extends React.Component {
           onVertexMouseUp: (evt, [x, y]) => {
             //游戏逻辑交付game.js进行处理
             //提交坐标和当前棋盘给game.js，然后点击事件
-            let res;
+            let res = { status: 0 };
             if (GameLogic.gameMode == 0)
               res = GameLogic.gameHandle(this.state, [x, y]);
             else if (GameLogic.gameMode == 1)
               res = GameLogic.onlineHandle(this.state, [x, y]);
-            else
+            else if (GameLogic.gameMode == 2)
               res = { status: 0 }; //观战模式不执行任何操作
+
 
             if (res.status == 1)
               this.setState(res.data);
+
+            if (GameLogic.gameMode == 3) {
+              //人机模式，先人下，后机器下
+              res = GameLogic.aiHandle(this.state, [x, y], 1);
+
+              console.log("人的坐标：", [x,y]);
+              console.log("人下棋结果：", res);
+              if (res.status == 1)
+                this.setState(res.data);
+
+              console.log("机器下棋间隔");
+              if (res.data.isBusy != true) {
+                let cords = AIPlay(res.data.board.signMap);
+                console.log("机器下的坐标：", cords);
+                res = GameLogic.aiHandle(this.state, cords, -1);
+                console.log("机器下棋结果：", res);
+                if (res.status == 1)
+                  this.setState(res.data);
+              }
+            }
           }
         }),
         alternateCoordinates &&

@@ -41,6 +41,27 @@ class Room {
         return { mode: 1, room: room }
     }
 
+    CreatePveRoom(info) {
+        let u = User.FindUser(info);
+        if (u.mode == 0)
+            return u;
+        //创建一个房间，写入当前玩家数据
+        let room = {
+            users: [],
+            operations: [],
+            status: 0
+        };
+        room.id = this.roomData.length;
+        u.info.sign = 1; //房主棋色为黑棋
+        room.users.push(u.info);
+        room.users.push(u.info); //人机对战房间直接满员
+
+        this.roomData.push(room);
+        fs.writeFileSync("./data/rooms.json", JSON.stringify(this.roomData));
+
+        return { mode: 1, room: room }
+    }
+
     FindRoom(room) {
         if (room.id == '')
             return { mode: 0, err: 100, msg: "empty params" };

@@ -2,6 +2,7 @@
 import base64 from 'base-64'
 import urlDomain from '../components/Url.jsx';
 
+
 function GameLogic() {
 
     this.init = () => {
@@ -58,7 +59,7 @@ function GameLogic() {
                 } else {
                     this.setTitle({
                         type: "info",
-                        title: "游戏进行中",
+                        title: `游戏进行中，房间ID：${this.gameInfo.room.id}`,
                         content: `当前回合，${data.sign == 1?'白':'黑'}棋行`
                     });
                 }
@@ -124,13 +125,23 @@ function GameLogic() {
         } else {
             this.setTitle({
                 type: "info",
-                title: "游戏进行中",
+                title: `游戏进行中，房间ID：${this.gameInfo.room.id}`,
                 content: `当前回合，黑棋行`
             });
         }
         return { status: 0 };
 
     }
+
+
+    this.pveInit = () => {
+        this.setTitle({
+            type: "info",
+            title: `游戏进行中，房间ID：${this.gameInfo.room.id}`,
+            content: `当前回合，黑棋行`
+        });
+    }
+
 
     this.setInterface = (setOpen, setMsgBox, setTitle, setError) => {
         this.setOpen = setOpen;
@@ -220,6 +231,67 @@ function GameLogic() {
             userID: User.info.id,
             vertex: [x, y],
             sign: this.gameInfo.sign
+        }
+        let url = `http://${urlDomain}/room/write?room=${base64.encode(JSON.stringify(room))}&info=${base64.encode(JSON.stringify(User.info))}&data=${base64.encode(JSON.stringify(operation))}`;
+        fetch(url);
+
+        //pullData方法会同步服务器与本地数据，但是防止网络延迟导致自己多下一步棋，本地记录提前更新一次
+        this.gameInfo.room.operations.push(operation);
+
+        return {
+            status: 1,
+            data: {
+                board: newBoard,
+                sign: state.sign * -1,
+                selectedVertices: [
+                    [x, y]
+                ],
+                isBusy: victory
+            }
+        }
+    }
+
+    this.aiHandle = (state, [x, y], aSign) => {
+        let gi = this.gameInfo.room;
+        if (gi.users.length < 2)
+            return { status: 0 }
+
+        if (gi.operations.length > 0) {
+            let data = gi.operations[gi.operations.length - 1];
+            if (aSign == data.sign)
+                return { status: 0 }
+        }
+
+        let newBoard, victory
+        if (state.board.get([x, y]) != 0)
+            return { status: 0 }
+
+        newBoard = state.board.set([x, y], aSign);
+        victory = this.isVictory(aSign, newBoard.signMap, [x, y]);
+
+        if (victory) {
+            let resStr = `${aSign == 1?'黑':'白'}棋胜`;
+            this.setTitle({ title: "游戏结束", content: resStr });
+            this.setMsgBox({ title: "游戏结束", content: resStr });
+            this.setOpen(true);
+            clearInterval(this.gameInfo.interval);
+
+            //游戏结束，关闭房间
+            let room = { id: this.gameInfo.room.id }
+            let url = `http://${urlDomain}/room/close?room=${base64.encode(JSON.stringify(room))}`;
+            fetch(url);
+
+        } else {
+            this.setTitle({ type: "info", title: `游戏进行中，房间ID：${this.gameInfo.room.id}`, content: `当前回合，${this.gameInfo.sign == 1?'白':'黑'}棋行` });
+        }
+
+
+        //向服务器上传本次操作数据
+        let room = { id: this.gameInfo.room.id }
+        let operation = {
+            userID: User.info.id,
+            vertex: [x, y],
+            sign: aSign
         }
         let url = `http://${urlDomain}/room/write?room=${base64.encode(JSON.stringify(room))}&info=${base64.encode(JSON.stringify(User.info))}&data=${base64.encode(JSON.stringify(operation))}`;
         fetch(url);

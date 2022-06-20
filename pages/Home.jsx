@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
 import base64 from 'base-64'
+import SelectionBox from '../components/SelectionBox.jsx';
 import MessageBox from "../components/MessageBox.jsx"
 import DataBox from "../components/DataBox.jsx"
 import urlDomain from '../components/Url.jsx';
@@ -41,6 +42,45 @@ export default function Home() {
   const [datBox, setDatBox] = React.useState({ title: "提示", content: "请输入要加入的房间ID", });
 
 
+  const PVE = async () => {
+    let url = `http://${urlDomain}/pveroom/create?info=${base64.encode(JSON.stringify(User.info))}`;
+    let result = await fetch(url)
+    let data = await result.json();
+    if (data.mode == 0) {
+      setMsgBox({ title: "错误", content: "创建房间失败，请稍后再试！" });
+      setOpen(true);
+      return;
+    }
+
+    else if (data.mode == 1) {
+      GameLogic.init();
+      GameLogic.gameInfo.sign = 1; //房主默认下黑棋
+      GameLogic.gameInfo.room = data.room;
+      GameLogic.gameMode = 3;
+      navigate("/game");
+    }
+  }
+
+  const PVP = async () => {
+    let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
+    let result = await fetch(url)
+    let data = await result.json();
+    if (data.mode == 0) {
+      setMsgBox({ title: "错误", content: "创建房间失败，请稍后再试！" });
+      setOpen(true);
+      return;
+    }
+
+    else if (data.mode == 1) {
+      GameLogic.init();
+      GameLogic.gameInfo.sign = 1; //房主默认下黑棋
+      GameLogic.gameInfo.room = data.room;
+      GameLogic.gameMode = 1;
+      navigate("/game");
+    }
+  }
+
+
   const handleClose = () => {
     setOpen(false);
     if (onlyc) {
@@ -65,23 +105,7 @@ export default function Home() {
       return;
     }
 
-
-    let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
-    let result = await fetch(url)
-    let data = await result.json();
-    if (data.mode == 0) {
-      setMsgBox({ title: "错误", content: "创建房间失败，请稍后再试！" });
-      setOpen(true);
-      return;
-    }
-
-    else if (data.mode == 1) {
-      GameLogic.init();
-      GameLogic.gameInfo.sign = 1; //房主默认下黑棋
-      GameLogic.gameInfo.room = data.room;
-      GameLogic.gameMode = 1;
-      navigate("/game");
-    }
+    setSeOpen(true);
 
   }
 
@@ -168,6 +192,8 @@ export default function Home() {
   }
 
 
+
+
   return (
 
 
@@ -175,6 +201,8 @@ export default function Home() {
       <MessageBox title={msgBox.title} content={msgBox.content} open={open} onClick={handleClose} />
 
       <DataBox title={datBox.title} content={datBox.content} open={datOpen} onCancel={cancelJoin} onConfirm={confirmJoin} textlabel="ID" texttype="number" />
+
+      <SelectionBox title="提示" content="请选择房间类型" open={seOpen} se1={PVE} se1title="人机" se2={PVP} se2title="人人" />
 
       <Stack sx={{ marginTop: 15, marginBottom: 15 }} direction="column" spacing={10} justifyContent="center" alignItems="center">
 
