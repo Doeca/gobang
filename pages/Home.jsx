@@ -21,14 +21,22 @@ import GameLogic from '../logic/game'
 import User from '../logic/user'
 
 
-
+//时隔两周回来看自己的代码看不懂了是怎么回事捏？
 
 
 export default function Home() {
   const navigate = useNavigate();
   const [onlyc, setOnlyc] = React.useState(false);
+
+  // 提示框
   const [open, setOpen] = React.useState(false);
   const [msgBox, setMsgBox] = React.useState({ title: "", content: "" });
+
+  // 二项选择框
+  const [seOpen, setSeOpen] = React.useState(false);
+  const [seBox, setSeBox] = React.useState({ title: "", content: "" });
+
+  // 输入框
   const [datOpen, setdatOpen] = React.useState(false);
   const [datBox, setDatBox] = React.useState({ title: "提示", content: "请输入要加入的房间ID", });
 
@@ -56,6 +64,8 @@ export default function Home() {
       setOpen(true);
       return;
     }
+
+
     let url = `http://${urlDomain}/room/create?info=${base64.encode(JSON.stringify(User.info))}`;
     let result = await fetch(url)
     let data = await result.json();
